@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="uFlake GUI/uFlake GUI.vcxproj" Id="3e363cec-32fc-4fdb-99ba-a89940a825b8" />
+</Solution>
