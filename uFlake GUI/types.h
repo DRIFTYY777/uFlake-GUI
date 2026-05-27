@@ -19,6 +19,9 @@ typedef struct ugui ugui;
 // Flush function pointer - user implements this
 typedef void (*flush_fn)(ugui *gui);
 
+// Poll function pointer - user implements this
+typedef void (*poll_fn)(void);
+
 // Main GUI structure
 typedef struct ugui
 {
@@ -30,6 +33,7 @@ typedef struct ugui
 	uint16_t height;
 	ugui_color color;
 	flush_fn flush_func;
+	poll_fn poll_func;
 	bool active_buffer;
 	uint8_t font_width;    // Current font width
 	uint8_t font_height;   // Current font height
@@ -44,6 +48,7 @@ typedef struct {
 	uint16_t height;
 	uint8_t rotation;
 	flush_fn flush_func;
+	poll_fn poll_func;
 	uint16_t* buffer1;
 	uint16_t* buffer2;
 } ugui_config;

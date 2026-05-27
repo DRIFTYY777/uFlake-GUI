@@ -7,6 +7,9 @@
 #include "text.h"
 #include "colors.h"
 #include "input.h"
+#include "ugui_canvas.h"
+#include "ugui_scene.h"
+#include "ugui_task.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -17,8 +20,6 @@ extern "C"
 	void gui_task();
 	void set_background_color(ugui_color color);
 	void draw_circle(int x0, int y0, int radius);
-
-
     void ugui_swap_buffer();
 #ifdef __cplusplus
 }

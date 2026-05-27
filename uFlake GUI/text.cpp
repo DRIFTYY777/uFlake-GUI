@@ -1,5 +1,6 @@
 #include "text.h"
 #include "fonts.h"
+#include "ugui_canvas.h"
 
 // Font pointers from fonts.h
 extern const uint8_t* font_8x8_data;
@@ -49,6 +50,9 @@ void draw_text(const char* text, int x, int y)
 	if (!ugui_instance || !text || !ugui_instance->buffer) return;
 	if (!ugui_instance->font_data) return;
 
+	int start_x = x;
+	int text_end_x = x;
+
 	while (*text)
 	{
 		unsigned char c = *text++;
@@ -73,7 +77,13 @@ void draw_text(const char* text, int x, int y)
 				}
 			}
 		}
+		text_end_x = x + ugui_instance->font_width;
 		x += ugui_instance->font_width;
+	}
+
+	// Mark text region as dirty
+	if (text_end_x > start_x) {
+		ugui_canvas_mark_dirty(start_x, y, text_end_x - start_x, ugui_instance->font_height);
 	}
 }
 

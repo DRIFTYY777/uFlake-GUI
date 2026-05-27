@@ -131,16 +131,16 @@ void on_button_press(key_code_t key, button_state_t state)
 			demo_state.menu_select = 0;
 			break;
 		case KEY_BACK:
-			// Exit application
-			exit(0);
+			//exit menu
+			demo_state.show_menu = false;
+			demo_state.menu_select = 0;
+
+			
 			break;
 		default:
 			break;
 		}
 	}
-
-	// Redraw display after state change
-	draw_demo();
 }
 
 void draw_demo()
@@ -187,9 +187,6 @@ void draw_demo()
 		draw_text("Press 5 to show menu", 10, 190);
 		draw_text("Press 3 to exit", 10, 210);
 	}
-
-	// Flush display
-	gui_instance.flush_func(&gui_instance);
 }
 
 int main()
@@ -208,27 +205,25 @@ int main()
 		.width = WIDTH,
 		.height = HEIGHT,
 		.flush_func = sdl_flush,
+		.poll_func = sdl_poll_input,
 		.buffer1 = buffer1,
 		.buffer2 = buffer2
 	};
 	init_ugui(&config, &gui_instance);
 
-	// Initialize input system with SDL polling
-	init_input(sdl_poll_input);
-
 	// Register button callback for interactive demo
 	register_button_callback(on_button_press);
-
-	// Draw initial demo
-	draw_demo();
 
 	// Event loop
 	bool running = true;
 	SDL_Event event;
 
 	while (running) {
-		// Poll input every frame
-		update_input();
+		// Draw scene
+		draw_demo();
+
+		// gui_task handles input polling and flushing
+		gui_task();
 
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_EVENT_QUIT) {

@@ -1,29 +1,19 @@
 #include "input.h"
+#include "types.h"
 
 // Button states (track current state of each button)
 static button_state_t button_states[6] = { BTN_RELEASED };
 
-// Platform-specific poll function pointer
-static void (*platform_poll_fn)(void) = nullptr;
-
 // Optional button event callback
 static button_callback_fn button_event_callback = nullptr;
 
-// Initialize input system
-void init_input(void (*poll_fn)(void))
-{
-	platform_poll_fn = poll_fn;
-	// Initialize all button states to released
-	for (int i = 0; i < 6; i++) {
-		button_states[i] = BTN_RELEASED;
-	}
-}
+
 
 // Poll for button input
 void update_input(void)
 {
-	if (platform_poll_fn) {
-		platform_poll_fn();
+	if (ugui_instance && ugui_instance->poll_func) {
+		ugui_instance->poll_func();
 	}
 }
 

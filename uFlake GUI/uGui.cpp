@@ -1,4 +1,7 @@
 #include "uGui.h"
+#include "ugui_canvas.h"
+#include "ugui_scene.h"
+#include "ugui_task.h"
 
 #include <cstdlib>
 
@@ -20,6 +23,7 @@ void init_ugui(ugui_config* config, ugui *instance)
 	ugui_instance->height = config->height;
 	ugui_instance->color = WHITE;  // Default text color is WHITE
 	ugui_instance->flush_func = config->flush_func;
+	ugui_instance->poll_func = config->poll_func;
 	ugui_instance->active_buffer = 0;
 
 	// Initialize default font (8x8)
@@ -29,6 +33,18 @@ void init_ugui(ugui_config* config, ugui *instance)
 
 	// Set buffer pointer to active buffer (buffer1 initially)
 	ugui_instance->buffer = ugui_instance->buffer1;
+
+	// Initialize subsystems
+	ugui_canvas_init(config->width, config->height);
+	ugui_scene_manager_init();
+	
+	// Initialize task system with default config
+	ugui_task_config_t task_config = {
+		.input_poll_ms = 10,   // Poll input every 10ms
+		.frame_time_ms = 16,   // 60fps target
+		.max_frame_skip = 2
+	};
+	ugui_task_init(&task_config);
 }
 
 void deinit_ugui() {
@@ -40,6 +56,11 @@ void deinit_ugui() {
 }
 void gui_task() {
 	update_input();
+
+	// Flush display
+	if (ugui_instance && ugui_instance->flush_func) {
+		ugui_instance->flush_func(ugui_instance);
+	}
 }
 
 
@@ -49,6 +70,8 @@ void set_background_color(ugui_color color) {
 	{
 		ugui_instance->buffer[i] = color;
 	}
+	// Mark entire display as dirty
+	ugui_canvas_mark_all_dirty();
 }
 
 void draw_circle(int x0, int y0, int radius)
@@ -57,6 +80,12 @@ void draw_circle(int x0, int y0, int radius)
 	int x = radius;
 	int y = 0;
 	int err = 0;
+	
+	int min_x = x0 - radius;
+	int max_x = x0 + radius;
+	int min_y = y0 - radius;
+	int max_y = y0 + radius;
+	
 	while (x >= y)
 	{
 		// Draw the eight octants
@@ -84,6 +113,19 @@ void draw_circle(int x0, int y0, int radius)
 			x--;
 		}
 	}
+	
+	// Mark circle bounding box as dirty
+	if (max_x < 0 || min_x >= (int)ugui_instance->width ||
+		max_y < 0 || min_y >= (int)ugui_instance->height) {
+		return;  // Circle completely off-screen
+	}
+	
+	if (min_x < 0) min_x = 0;
+	if (max_x >= (int)ugui_instance->width) max_x = ugui_instance->width - 1;
+	if (min_y < 0) min_y = 0;
+	if (max_y >= (int)ugui_instance->height) max_y = ugui_instance->height - 1;
+	
+	ugui_canvas_mark_dirty(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1);
 }
 
 void ugui_swap_buffer()
